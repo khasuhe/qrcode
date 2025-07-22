@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Scanner - SSO Dapodik</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+        }
+        .qr-container {
+            transition: all 0.3s ease;
+        }
+        .bookmarklet-btn {
+            position: relative;
+            overflow: hidden;
+        }
+        .bookmarklet-btn:after {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            left: 0;
+            top: 0;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-100%);
+            transition: transform 0.3s ease;
+        }
+        .bookmarklet-btn:hover:after {
+            transform: translateY(0);
+        }
+        .tooltip {
+            position: relative;
+        }
+        .tooltip-text {
+            visibility: hidden;
+            width: 200px;
+            background-color: #222;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden w-full max-w-md">
+        <div class="bg-blue-600 p-4 text-white text-center">
+            <h1 class="text-xl font-bold">SSO Dapodik Authentication</h1>
+        </div>
+        
+        <div class="p-6">
+            <div class="mb-6 text-center">
+                <h2 class="text-lg font-semibold text-gray-700 mb-2">Scan QR Code</h2>
+                <p class="text-gray-500 text-sm">Untuk melanjutkan proses autentikasi</p>
+            </div>
+            
+            <div class="qr-container bg-white p-4 rounded-lg border border-gray-200 mb-6 flex justify-center">
+                <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/997d1008-58ea-43cc-b57d-d9dac2ab2ac9.png" alt="QR Code untuk autentikasi SSO Dapodik dengan pola hitam putih persegi di atas latar putih" id="qr-code" class="w-64 h-64">
+            </div>
+            
+            <div class="flex flex-col space-y-4">
+                <button id="rescan-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    Scan Ulang QRCode
+                </button>
+                
+                <div class="mt-6 bg-gray-50 p-4 rounded-lg">
+                    <h3 class="font-medium text-gray-700 mb-2 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        Cara Penggunaan
+                    </h3>
+                    <ol class="text-sm text-gray-600 list-decimal pl-5 space-y-1">
+                        <li>Seret tombol scan ulang qr diatas ke bar bookmark browser</li>
+                        <li>Login ke SSO Dapodik hingga sampai ke laman autentikasi</li>
+                        <li>Klik bookmark yang sudah dibuat</li>
+                        <li>Tunggu sampai QR Code tampil</li>
+                    </ol>
+                    
+                    <div class="mt-4">
+                        <a href="javascript:void(0);" id="bookmarklet" class="bookmarklet-btn inline-block bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors">
+                            Scan Ulang QR
+                        </a>
+                        <span class="tooltip inline-block ml-2 cursor-help">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span class="tooltip-text">Seret tombol ini ke bookmarks bar browser Anda</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // QR Code Rescan Functionality
+            const rescanBtn = document.getElementById('rescan-btn');
+            const qrCode = document.getElementById('qr-code');
+            
+            rescanBtn.addEventListener('click', function() {
+                // Show loading state
+                rescanBtn.disabled = true;
+                rescanBtn.innerHTML = `
+                    <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Memproses...
+                `;
+                
+                // Simulate QR code regeneration with a new random parameter
+                setTimeout(function() {
+                    const randomParam = Math.random().toString(36).substring(2, 15);
+                    qrCode.src = `https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/8a9a87c9-cfae-4d4c-be03-4508d4fad90b.png
+                    
+                    // Restore button state
+                    rescanBtn.disabled = false;
+                    rescanBtn.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        Scan Ulang QRCode
+                    `;
+                    
+                    // Show success notification
+                    alert('QR Code berhasil diperbarui!');
+                }, 1500);
+            });
+            
+            // Bookmarklet functionality
+            const bookmarklet = document.getElementById('bookmarklet');
+            bookmarklet.addEventListener('click', function() {
+                alert('Untuk menggunakan fitur ini:\n1. Seret tombol ini ke bookmark bar browser Anda\n2. Buka laman autentikasi SSO Dapodik\n3. Klik bookmark yang telah dibuat');
+            });
+        });
+    </script>
+</body>
+</html>
+
